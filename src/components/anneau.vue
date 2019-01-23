@@ -17,6 +17,7 @@ export default {
       dragging: false,
       whoisdragging: '',
       pos4: 0
+
     }
   },
 
@@ -26,6 +27,7 @@ export default {
       /* stop moving when mouse button is released: */
       this.$emit('selected', document.getElementById(this.whoisdragging))
       this.dragging = false
+      this.num1 = ''
       this.whoisdragging = ''
     },
     nommeid () {
@@ -43,6 +45,7 @@ export default {
         this.pos3 = e.clientX
         this.pos4 = e.clientY
         // set the element's new position:
+        if (this.pos1 < 0) { this.num1 = 'tordre' } else { this.num1 = 'tordre1' }
 
         elmnt.style.top = elmnt.offsetTop - this.pos2 + 'px'
         elmnt.style.left = elmnt.offsetLeft - this.pos1 + 'px'
@@ -128,5 +131,8 @@ export default {
 
 .tordre {
   transform: skew(-34deg, 0deg);
+}
+.tordre1 {
+  transform: skew(34deg, 0deg);
 }
 </style>
