@@ -45,7 +45,7 @@ export default {
         this.pos3 = e.clientX
         this.pos4 = e.clientY
         // set the element's new position:
-        if (this.pos1 < 0) { this.num1 = 'tordre' } else { this.num1 = 'tordre1' }
+        if (this.pos1 < 0) { this.num1 = 'anneauxhover2' } else { this.num1 = 'anneauxhover' }
 
         elmnt.style.top = elmnt.offsetTop - this.pos2 + 'px'
         elmnt.style.left = elmnt.offsetLeft - this.pos1 + 'px'
@@ -130,7 +130,7 @@ export default {
 }
 
 .tordre {
-  transform: skew(-10deg, 0deg);
+  transform: translate3d;
 
 }
 .tordre1 {

@@ -20,7 +20,7 @@
 
   </div>
   <button @click.prevent="deplace()">deplace</button>
-  <img src="./logo.png">
+  <button >{{this.action}}</button>
 <div class="action"><p>
 Modèle d'une tour de Hanoï <br>
 
@@ -28,7 +28,7 @@ Les tours de Hanoï (originellement, la tour d'Hanoïa) sont un jeu de réflexio
 
 on ne peut déplacer plus d'un disque à la fois ;<br>
 on ne peut placer un disque que sur un autre disque plus grand que lui ou sur un emplacement vide. <br>
-On suppose que cette dernière règle est également respectée dans la configuration de départ.{{this.action}}</p></div>
+On suppose que cette dernière règle est également respectée dans la configuration de départ.</p></div>
 
 </div>
 
@@ -391,7 +391,7 @@ h4 {
 h1 {
   color: black;
   margin-top: 0;
-  font-size: 6.854em;
+  font-size: 6.7em;
 }
 
 h2 {

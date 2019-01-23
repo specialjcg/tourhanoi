@@ -6,14 +6,14 @@
 </template>
 
 <script>
-import tictactoe from "./components/tictactoe";
+import tictactoe from './components/tictactoe'
 
 export default {
-  name: "App",
+  name: 'App',
   components: {
     tictactoe
   }
-};
+}
 </script>
 
 <style>
