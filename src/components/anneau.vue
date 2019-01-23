@@ -130,9 +130,11 @@ export default {
 }
 
 .tordre {
-  transform: skew(-34deg, 0deg);
+  transform: skew(-10deg, 0deg);
+
 }
 .tordre1 {
-  transform: skew(34deg, 0deg);
+  transform: skew(10deg, 0deg);
+
 }
 </style>
