@@ -3,11 +3,11 @@ const path = require('path')
 const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
-
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 function resolve (dir) {
   return path.join(__dirname, '..', dir)
 }
-
+const isProduction = process.env.NODE_ENV === 'production';
 const createLintingRule = () => ({
   test: /\.(js|vue)$/,
   loader: 'eslint-loader',
@@ -66,6 +66,22 @@ module.exports = {
           limit: 10000,
           name: utils.assetsPath('media/[name].[hash:7].[ext]')
         }
+      },
+      {
+        test: /\.css$/,
+         use: [
+           isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+           'css-loader',
+           'less-loader'
+         ],
+      },
+      {
+        test: /\.less$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          'less-loader'
+        ],
       },
       {
         test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
