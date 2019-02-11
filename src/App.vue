@@ -6,6 +6,7 @@
 </template>
 
 <script>
+
 import tictactoe from './components/tictactoe'
 
 export default {

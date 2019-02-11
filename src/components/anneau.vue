@@ -6,17 +6,21 @@
 </template>
 <script>
 export default {
+  name: 'anneau',
   props: {qAnneau: Number, aryoudragable: false},
   data () {
     return {
       num1: '',
       larg: 0,
       elmnt1: null,
+      elmnt12: null,
       pos1: 0,
       pos2: 0,
       dragging: false,
       whoisdragging: '',
-      pos4: 0
+      pos4: 0,
+      largeurAnneau: [50, 60, 70, 80, 90],
+      posleftAnneau: [8.5, 7, 5, 3, 1.5]
 
     }
   },
@@ -36,24 +40,31 @@ export default {
     },
     elementDrag (e) {
       /* e = e || window.event; */
+
       if ((this.whoisdragging !== '') && this.dragging && this.aryoudragable) {
-        var elmnt = document.getElementById(e.target.id)
+        this.pos1 = 0
+        this.pos2 = 0
 
         // calculate the new cursor position:
         this.pos1 = this.pos3 - e.clientX
         this.pos2 = this.pos4 - e.clientY
         this.pos3 = e.clientX
         this.pos4 = e.clientY
+        var decal = 0
         // set the element's new position:
         if (this.pos1 < 0) { this.num1 = 'anneauxhover2' } else { this.num1 = 'anneauxhover' }
+        if (this.elmnt12.left < document.body.clientWidth / 3) { decal = 0 } else if (this.elmnt12.left < (2 * document.body.clientWidth) / 3) { decal = (document.body.clientWidth) / 3 } else { decal = (2 * document.body.clientWidth) / 3 }
 
-        elmnt.style.top = elmnt.offsetTop - this.pos2 + 'px'
-        elmnt.style.left = elmnt.offsetLeft - this.pos1 + 'px'
+        /*  if (this.elmnt12.left > 1000) { decal = 990 } else if (this.elmnt12.left > 500) { decal = 500 } */
+        this.elmnt1.style.top = -this.elmnt12.top - this.elmnt12.height / 2 + e.clientY + 'px'
+        this.elmnt1.style.left = -decal - this.elmnt12.width / 2 + e.clientX + 'px'
       }
     },
     dragElement: function (e) {
       if (this.aryoudragable) {
         this.whoisdragging = e.target.id
+        this.elmnt1 = document.getElementById(e.target.id)
+        this.elmnt12 = this.elmnt1.getBoundingClientRect()
         this.pos3 = e.clientX
         this.pos4 = e.clientY
         this.dragging = true
@@ -65,14 +76,8 @@ export default {
       var tran = ''
       var tranleft = ''
 
-      if (this.larg === 0) {
-        tran = 6 * (Number(this.qAnneau) + 1) + '%'
-        var model = 6 * (Number(this.qAnneau) + 1)
-        this.larg = model
-      } else {
-        tran = Number(this.larg) + '%'
-        tranleft = 3 * (5 - Number(this.qAnneau) + 1) - 3.5 + 'vw'
-      }
+      tran = this.largeurAnneau[this.qAnneau] + '%'
+      tranleft = this.posleftAnneau[this.qAnneau] + 'vw'
 
       return { width: tran, left: tranleft }
     }}
@@ -83,11 +88,11 @@ export default {
 .anneaux {
   justify-self: center;
   align-self: center;
-  position: absolute;
+  position: relative;
 
   cursor: move;
   height: 5vh;
-
+z-index: 4;
   background: radial-gradient(
     circle at 10vw 10vw,
     @rgba-primary-1,
@@ -95,15 +100,18 @@ export default {
   );
  transform: translateZ(0);
   border-radius: 1vw;
-  transition: width 0.5s ease;
+  transition: width 1s ;
+  /*transition: all 0.3s;*/
+
 }
 
 .ball {
-  width: 100%;
-  height: 3.5vw;
-  margin: 0;
-
-  position: absolute;
+  min-width: auto;
+  height: 7vh;
+ z-index: 4;
+margin-top: 1.1vh;
+margin-bottom: 0.7vh;
+  position: relative;
   background: radial-gradient(
     circle at 50% 120%,
     #81e8f6,
@@ -119,14 +127,14 @@ export default {
   left: 5%;
   width: 90%;
   height: 90%;
-
+z-index: 4;
   background: radial-gradient(
     circle at 50% 0px,
     #ffffff,
     rgba(255, 255, 255, 0) 58%
   );
   filter: blur(5px);
-  z-index: 2;
+ z-index: 4;
 }
 
 .tordre {

@@ -1,69 +1,94 @@
 
 <template>
 <div>
-  <div class="grid-container" >
-  <div :id="numdiv(n)" class="grid-item" v-for="n in 15"  @dragover.prevent="allowDrop($event)" :key="n">
 
- <anneau  :qAnneau="0" :aryoudragable=aryoudragable1  v-if="n===1" @selected="drop1($event)"   ></anneau>
-<anneau  :qAnneau="1" :aryoudragable=aryoudragable2  v-else-if="n===4" @selected="drop1($event)"  ></anneau>
-<anneau  :qAnneau="2" :aryoudragable=aryoudragable3  v-else-if="n===7"  @selected="drop1($event)"  ></anneau>
-<anneau  :qAnneau="3" :aryoudragable=aryoudragable4  v-else-if="n===10" @selected="drop1($event)"   ></anneau>
-<anneau  :qAnneau="4" :aryoudragable=aryoudragable5  v-else-if="n===13"  @selected="drop1($event)"  ></anneau>
-
-  </div>
-
+<transition-group name="shuffleFast" tag="div" class="posanneau" @dragover.prevent="allowDrop()"  :key="componentKey" >
+  <div v-for="tourdehanoi in tourdehanois" :key="tourdehanoi.id" :id="'div'+tourdehanoi.id" class="touredehanoi" >
+ <anneau   :qAnneau="tourdehanoi.id" :aryoudragable=tourdehanoi.anneaudrable  v-if="tourdehanoi. anneaupresentegaltaillenonnul!==0" @selected="drop1($event)" ></anneau>
+<div class="touredehanoi" v-else></div>
 </div>
+</transition-group>
+<div v-for="n in 3" :class="'tower'+n" :key="n"></div>
 <div class="nombredecoup">
 
   <h4>Nombre de coup</h4>
   <h1>{{coup}}</h1>
 
   </div>
-  <button @click.prevent="deplace()">deplace</button>
-  <button >{{this.action}}</button>
+
 <div class="action"><p>
-Modèle d'une tour de Hanoï <br>
+<a href="https://fr.wikipedia.org/wiki/Tours_de_Hanoï" target="_blank" noopener noreferrer >Modèle d'une tour de Hanoï </a><br>
 
 Les tours de Hanoï (originellement, la tour d'Hanoïa) sont un jeu de réflexion imaginé par le mathématicien français Édouard Lucas, et consistant à déplacer des disques de diamètres différents d'une tour de « départ » à une tour d'« arrivée » en passant par une tour « intermédiaire », et ceci en un minimum de coups, tout en respectant les règles suivantes : <br>
 
 on ne peut déplacer plus d'un disque à la fois ;<br>
 on ne peut placer un disque que sur un autre disque plus grand que lui ou sur un emplacement vide. <br>
 On suppose que cette dernière règle est également respectée dans la configuration de départ.</p></div>
-
+ <button class="but1" @click.prevent="deplace()">Solution Optimale</button>
+  <button class="but2" @click.prevent="deplace_un_par_un()">Déplacer un par un (itératif) {{this.action}}</button>
 </div>
 
 </template>
 <script>
 import anneau from './anneau.vue'
+
 export default {
+
   components: {
     anneau
+
   },
   data () {
     return {
       coup: 0,
+      temp: '',
       index: 0,
       index1: 0,
       action: 'continuer',
       storepos: [],
       storeposprec: [],
       storeposWin: [],
+      tourdehanois: [],
+      show: true,
+      componentKey: 0,
+      timer: null,
       posi: [],
+      id: 1,
       selectedrag: '',
-      aryoudragable5: false,
-      aryoudragable4: false,
-      aryoudragable3: false,
-      aryoudragable2: false,
-      aryoudragable1: true
-
+      disqueprochain: 0,
+      largeurAnneau: [50, 60, 70, 80, 90],
+      posleftAnneau: [8.5, 7, 5, 3, 1.5],
+      essai: true
     }
   },
   mounted () {
     this.storeposWin = [3, 6, 9, 12, 15]
+    this.tourdehanois = []
+    this.id = 0
+    for (var i = 0; i < 15; i++) {
+      let tourdehanoi = {
+        id: i,
+        anneaupresentegaltaillenonnul: 0,
+        anneaudrable: ''
+
+      }
+
+      this.tourdehanois.push(tourdehanoi)
+    }
+
+    this.tourdehanois[0].anneaudrable = true
+    this.tourdehanois[0].anneaupresentegaltaillenonnul = 1
+    this.tourdehanois[0].id = 0
+    for (i = 1; i < 5; i++) { this.tourdehanois[i].anneaudrable = false; this.tourdehanois[i].anneaupresentegaltaillenonnul = i + 1; this.tourdehanois[i].id = i }
+    for (i = 5; i < 15; i++) { this.tourdehanois[i].anneaudrable = false; this.tourdehanois[i].anneaupresentegaltaillenonnul = 0; this.tourdehanois[i].id = i }
+  },
+  beforeDestroy () {
+    clearInterval(this.timer)
   },
   methods: {
-    test () {
-      return false
+
+    forceRerender (n) {
+      return 'tower' + n
     },
 
     numdiv (n1) {
@@ -75,234 +100,158 @@ export default {
       ev.preventDefault()
     },
     storePosition () {
-      this.storepos = []
-
-      var targ
-
-      for (var k = 1; k <= 15; k++) {
-        targ = 'div' + k
-        if (
-          document.getElementById(targ).childNodes.length === 0 ||
-          (document.getElementById(targ).childNodes[0].nodeName ===
-            '#comment' &&
-            document.getElementById(targ).childNodes.length === 1)
-        ) {
-        } else {
-          this.storepos.push(k)
-        }
-      }
-      if (this.storeposprec.join() === this.storepos.join()) {
-      } else {
-        this.storeposprec = this.storepos
-        this.coup++
-      }
-      if (this.storepos.join() === this.storeposWin.join()) {
-        this.action = 'you win'
-      }
+      if ((this.tourdehanois[10].anneaupresentegaltaillenonnul !== 0) &&
+     (this.tourdehanois[11].anneaupresentegaltaillenonnul !== 0) &&
+     (this.tourdehanois[12].anneaupresentegaltaillenonnul !== 0) &&
+     (this.tourdehanois[13].anneaupresentegaltaillenonnul !== 0) &&
+     (this.tourdehanois[14].anneaupresentegaltaillenonnul !== 0)) { return true } else { return false }
     },
     redesign () {
-      var data = 0
+      var tranleft = ''
       for (var k = 0; k < 5; k++) {
         var targ = 'drag' + k
 
         document.getElementById(targ).style.top = ''
-        if (document.getElementById(targ).parentNode.offsetLeft < document.body.clientWidth / 3) { data = 3 } else if (document.getElementById(targ).parentNode.offsetLeft < (2 * document.body.clientWidth) / 3) { data = 35 } else { data = 68 }
 
-        document.getElementById(targ).style.left = data + 3 * (5 - k) - 3.5 + 'vw'
+        tranleft = this.posleftAnneau[k] + 'vw'
+
+        document.getElementById(targ).style.left = tranleft
       }
     },
     reaffecdragable1 () {
-      var test = true
-      for (var k = 1; k < 6; k++) {
-        var targ = 'div' + Number((k - 1) * 3 + 1)
+      var sianneau = true
+      for (var k = 0; k < 5; k++) {
+        if (this.tourdehanois[k].anneaupresentegaltaillenonnul !== 0) {
+          this.tourdehanois[k].anneaudrable = sianneau
+          sianneau = false
+        } else {
 
-        if (document.getElementById(targ).childNodes[1] !== undefined && document.getElementById(targ).childNodes.length !== 0) {
-          if (document.getElementById(targ).childNodes[1].id === 'drag0') { this.aryoudragable1 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag1') { this.aryoudragable2 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag2') { this.aryoudragable3 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag3') { this.aryoudragable4 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag4') { this.aryoudragable5 = test; test = false }
-        }
-        if (document.getElementById(targ).childNodes[0] !== undefined && document.getElementById(targ).childNodes.length !== 0) {
-          if (document.getElementById(targ).childNodes[0].id === 'drag0') { this.aryoudragable1 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag1') { this.aryoudragable2 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag2') { this.aryoudragable3 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag3') { this.aryoudragable4 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag4') { this.aryoudragable5 = test; test = false }
         }
       }
-      test = true
-      for (k = 1; k < 6; k++) {
-        targ = 'div' + Number((k - 1) * 3 + 2)
+      sianneau = true
+      for (k = 5; k < 10; k++) {
+        if (this.tourdehanois[k].anneaupresentegaltaillenonnul !== 0) {
+          this.tourdehanois[k].anneaudrable = sianneau
+          sianneau = false
+        } else {
 
-        if (document.getElementById(targ).childNodes[1] !== undefined && document.getElementById(targ).childNodes.length !== 0) {
-          if (document.getElementById(targ).childNodes[1].id === 'drag0') { this.aryoudragable1 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag1') { this.aryoudragable2 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag2') { this.aryoudragable3 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag3') { this.aryoudragable4 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag4') { this.aryoudragable5 = test; test = false }
-        }
-        if (document.getElementById(targ).childNodes[0] !== undefined && document.getElementById(targ).childNodes.length !== 0) {
-          if (document.getElementById(targ).childNodes[0].id === 'drag0') { this.aryoudragable1 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag1') { this.aryoudragable2 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag2') { this.aryoudragable3 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag3') { this.aryoudragable4 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag4') { this.aryoudragable5 = test; test = false }
         }
       }
-      test = true
-      for (k = 1; k < 6; k++) {
-        targ = 'div' + Number((k - 1) * 3 + 3)
+      sianneau = true
+      for (k = 11; k < 15; k++) {
+        if (this.tourdehanois[k].anneaupresentegaltaillenonnul !== 0) {
+          this.tourdehanois[k].anneaudrable = sianneau
+          sianneau = false
+        } else {
 
-        if (document.getElementById(targ).childNodes[1] !== undefined && document.getElementById(targ).childNodes.length !== 0) {
-          if (document.getElementById(targ).childNodes[1].id === 'drag0') { this.aryoudragable1 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag1') { this.aryoudragable2 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag2') { this.aryoudragable3 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag3') { this.aryoudragable4 = test; test = false }
-          if (document.getElementById(targ).childNodes[1].id === 'drag4') { this.aryoudragable5 = test; test = false }
-        }
-        if (document.getElementById(targ).childNodes[0] !== undefined && document.getElementById(targ).childNodes.length !== 0) {
-          if (document.getElementById(targ).childNodes[0].id === 'drag0') { this.aryoudragable1 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag1') { this.aryoudragable2 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag2') { this.aryoudragable3 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag3') { this.aryoudragable4 = test; test = false }
-          if (document.getElementById(targ).childNodes[0].id === 'drag4') { this.aryoudragable5 = test; test = false }
         }
       }
     },
     tombe () {
-      var targ1, targ, targfirst
+      /* var targ1, targfirst, targfinal
+      var test = false
+      targfirst = targ.parentNode.parentNode.id
+      var cibleDiv = Number(targfirst.match(/\d+/g).join('')) */
 
-      var test = true
-      while (test) {
-        test = false
-        for (var k = 1; k < 13; k++) {
-          targ = 'div' + k
-          if (
-            document.getElementById(targ).childNodes.length === 0 ||
-            (document.getElementById(targ).childNodes[0].nodeName ===
-              '#comment' &&
-              document.getElementById(targ).childNodes.length === 1)
-          ) {
-          } else {
-            if (targfirst === '') {
-              targfirst = targ
-            }
-            targ1 = targ
-            targ = 'div' + (k + 3)
-            if (
-              document.getElementById(targ).childNodes.length === 0 ||
-              (document.getElementById(targ).childNodes[0].nodeName ===
-                '#comment' &&
-                document.getElementById(targ).childNodes.length === 1)
-            ) {
-              document
-                .getElementById(targ)
-                .appendChild(
-                  document.getElementById(targ1).childNodes[document.getElementById(targ1).childNodes.length - 1]
-                )
-              test = true
-            }
-          }
+      for (var k = 0; k < 4; k++) {
+        if ((this.tourdehanois[k].anneaudrable) && (this.tourdehanois[k + 1].anneaupresentegaltaillenonnul === 0)) {
+          let temp = this.tourdehanois[k]
+          this.$set(this.tourdehanois, k, this.tourdehanois[k + 1])
+          this.$set(this.tourdehanois, k + 1, temp)
+        }
+      }
+      for (k = 5; k < 9; k++) {
+        if ((this.tourdehanois[k].anneaudrable) && (this.tourdehanois[k + 1].anneaupresentegaltaillenonnul === 0)) {
+          let temp = this.tourdehanois[k]
+          this.$set(this.tourdehanois, k, this.tourdehanois[k + 1])
+          this.$set(this.tourdehanois, k + 1, temp)
+        }
+      }
+      for (k = 10; k < 14; k++) {
+        if ((this.tourdehanois[k].anneaudrable) && (this.tourdehanois[k + 1].anneaupresentegaltaillenonnul === 0)) {
+          let temp = this.tourdehanois[k]
+          this.$set(this.tourdehanois, k, this.tourdehanois[k + 1])
+          this.$set(this.tourdehanois, k + 1, temp)
         }
       }
 
-      this.storePosition()
+      this.reaffecdragable1()
     },
-    testanneauLepluspetit (colonneCible, anneauDeplacer) {
-      var test = true
-      var largeurAnneautest = document.getElementById(anneauDeplacer).offsetWidth
-      var cibleDiv = Number(colonneCible.id.match(/\d+/g).join(''))
-
-      for (var k = cibleDiv; k < 13; k += 3) {
-        var targ = 'div' + (k + 3)
-
-        if (document.getElementById(targ).childNodes[1] !== undefined && document.getElementById(targ).childNodes[1].offsetWidth !== undefined) {
-          var largeurAnneauDessous = document.getElementById(targ).childNodes[1].offsetWidth
-          if (Number(largeurAnneautest) > largeurAnneauDessous) {
-            test = false
-            break
+    testanneauLepluspetit (anneauDeplacer, colonneCible) {
+      var max = 15
+      var test1 = true
+      if (colonneCible < 4) { max = 5 } else if (colonneCible < 10) { max = 10 } else { max = 15 }
+      for (var k = colonneCible; k < max; k++) {
+        if (this.tourdehanois[k].anneaupresentegaltaillenonnul !== 0) {
+          if (this.tourdehanois[k].anneaupresentegaltaillenonnul < this.tourdehanois[anneauDeplacer].anneaupresentegaltaillenonnul) {
+            k = max
+            test1 = false
           } else {
-            test = true
-            break
-          }
-        } else if (document.getElementById(targ).childNodes[0] !== undefined && document.getElementById(targ).childNodes[0].offsetWidth !== undefined) {
-          var largeurAnneauDessous2 = document.getElementById(targ).childNodes[0].offsetWidth
-          if (Number(largeurAnneautest) > largeurAnneauDessous2) {
-            test = false
-            break
-          } else {
-            test = true
-            break
+            test1 = true
+            k = max
           }
         }
       }
-      return test
+      return test1
     },
+
     drop1 (ev) {
-      var elmnt = ev
+      if (ev != null) {
+        var elmnt = ev
 
-      var data = ''
+        var data = ''
 
-      document.onmouseup = null
-      document.onmousemove = null
-      if (ev.offsetLeft < document.body.clientWidth / 3) { data = 'div1' } else if (ev.offsetLeft < (2 * document.body.clientWidth) / 3) { data = 'div2' } else { data = 'div3' }
+        document.onmouseup = null
+        document.onmousemove = null
+        if (ev.offsetLeft < document.body.clientWidth / 3) { data = 0 } else if (ev.offsetLeft < (2 * document.body.clientWidth) / 3) { data = 5 } else { data = 10 }
 
-      if (elmnt !== '') {
-        if (document.getElementById(data).childNodes.length === 0) {
-          if (this.testanneauLepluspetit(document.getElementById(data), ev.id)) {
-            elmnt.style.top = ''
-
-            document.getElementById(data).appendChild(document.getElementById(ev.id))
-          }
-        } else if (
-          document.getElementById(data).childNodes[0].nodeName === '#comment' &&
-          document.getElementById(data).childNodes.length === 1
-        ) {
-          if (this.testanneauLepluspetit(document.getElementById(data), ev.id)) {
-            elmnt.style.top = ''
-
-            document.getElementById(data).appendChild(document.getElementById(ev.id))
-          }
-        } else {
+        if (elmnt !== '') {
+          var cibleDiv = Number(elmnt.id.match(/\d+/g).join(''))
+          var chgtdisque = 0
+          for (var j = 0; j < 15; j++) { if (this.tourdehanois[j].id === cibleDiv) { chgtdisque = j } }
+          if (this.deplace1(chgtdisque, data)) {}
         }
-        this.tombe()
-
-        this.selectedrag = ''
       }
       this.redesign()
       this.reaffecdragable1()
     },
+    deplace_un_par_un () {
+      var test = true
+      while ((test) && (this.action !== 'you win')) {
+        var h = 0
 
-    deplace () {
-      var data = 'drag2'
-      var target = 'div1'
-      if (target !== data && data !== 'null') {
-        if (document.getElementById(target).childNodes.length === 0) {
-          if (
-            this.testanneauLepluspetit(document.getElementById(target), data)
-          ) {
-            document
-              .getElementById(target)
-              .appendChild(document.getElementById(data))
-          }
-        } else if (
-          document.getElementById(target).childNodes[0].nodeName ===
-            '#comment' &&
-          document.getElementById(target).childNodes.length === 1
-        ) {
-          if (
-            this.testanneauLepluspetit(document.getElementById(target), data)
-          ) {
-            document
-              .getElementById(target)
-              .appendChild(document.getElementById(data))
+        if (this.disqueprochain > 4) { this.disqueprochain = 0 }
+        var i = 0
+        for (var j = 0; j < 15; j++) { if (this.tourdehanois[j].id === this.disqueprochain) { i = j } }
+        if (i < 5) { h = 10 } else if (i < 10) { h = 0 } else { h = 5 }
+        if (this.tourdehanois[i].anneaudrable) {
+          if (this.deplace1(i, h)) {
+            this.disqueprochain++; test = false; this.coup++
+          } else {
+            if (i < 5) { h = 5 } else if (i < 10) { h = 10 } else { h = 0 }
+            if (this.deplace1(i, h)) { this.disqueprochain++; test = false; this.coup++ } else {
+              this.disqueprochain++
+            }
           }
         } else {
+          this.disqueprochain++
         }
+        if (this.storePosition()) { this.action = 'you win'; clearInterval(this.timer) }
       }
+    },
 
-      this.tombe()
+    deplace () {
+      this.timer = setInterval(() => { this.deplace_un_par_un() }, 1000)
+    },
+    deplace1 (data1, target1) {
+      if (this.testanneauLepluspetit(data1, target1)) {
+        let temp = this.tourdehanois[data1]
+        this.$set(this.tourdehanois, data1, this.tourdehanois[target1])
+        this.$set(this.tourdehanois, target1, temp)
+        this.tombe()
+        this.redesign()
+        return true
+      } else { return false }
     },
 
     quelAnneau (n) {
@@ -316,7 +265,17 @@ export default {
 </script>
 <style lang="less" scoped>
 @import "./font.less";
+.shuffleFast-move {
+  transition: transform 1s;
+}
 
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
 @nombredor: 1.618em;
 
 .color-primary-0 {
@@ -345,9 +304,21 @@ export default {
   border-radius: 1vw;
 
   text-align: center;
-  margin-top: 3.5vh;
+   top: 62vh;
   font-family: "Merriweather", serif;
   padding: 1vw;
+}
+.nombredecoup2 {
+  position: relative;
+
+display: inline-block;
+  width: 75px;
+  height: 100px;
+  float: left;
+  margin-right: 5px;
+  margin-top: 1vh;
+  border-radius: 2px;
+background-color:red;
 }
 .action {
   position: absolute;
@@ -363,7 +334,7 @@ export default {
   line-height: 1.2; /* on rétablit le line-height */
   text-align: left;
   font-family: "Merriweather", serif;
-  margin-top: 3.5vw;
+  top: 62vh;
   padding: 1vw;
 }
 
@@ -414,14 +385,36 @@ small,
 .font_small {
   font-size: 0.618em;
 }
+.posanneau        {
+ display: flex;
+
+  flex-flow: column wrap;
+  justify-content: flex-start;
+  align-items: center;
+  align-content: center;
+ background-color:@rgba-secondary-2-0;
+position: relative;
+top:8vh;
+ border-radius: 1vh;
+width: 99vw;
+height: 45vh;
+}
+.touredehanoi{
+flex: 0 1 auto;
+
+  align-self: auto;
+ min-width: 33vw;
+  min-height: 9vh;
+
+}
 
 .grid-container {
   display: grid;
   grid-template-columns: auto auto auto;
   background-color: @rgba-secondary-1-4;
-  padding: 10px;
-  grid-auto-rows: minmax(65px, auto);
-  border-radius: 1vw;
+  padding: 1vh;
+  grid-auto-rows: minmax(8vh, auto);
+  border-radius: 1vh;
 }
 .grid-item {
   background-color: @rgba-secondary-1-4;
@@ -443,8 +436,46 @@ img {
   vertical-align: middle;
   flex: 0 1 auto;
 }
+.tower1 {
+    position: absolute;
+    top: 11vh;
+    left:16vw;
+    border-radius: 1vw;
+    width: 3vw;
+    height: 50vh;
+    z-index: 0;
+    background: linear-gradient(to right, #d7b889, #b27315, #966f33);
+}
+.tower2 {
+    position: absolute;
+    top: 11vh;
+    left:49vw;
+    border-radius: 1vw;
+    width: 3vw;
+    height: 50vh;
+    z-index: 0;
+    background: linear-gradient(to right, #d7b889, #b27315, #966f33);
+}
+.tower3 {
+    position: absolute;
+    top: 11vh;
+    left:82vw;
+    border-radius: 1vw;
+    width: 3vw;
+    height: 50vh;
+    z-index: 0;
+    background: linear-gradient(to right, #d7b889, #b27315, #966f33);
+}
+.but1{
+  top:90vh;
+  left:10vw;
+}
+.but2{
+  top:90vh;
+  left:40vw;
+}
 button {
-  position: relative;
+  position: absolute;
   color: #fbc831;
   font-family: "Bitter", serif;
   text-shadow: 3px 3px 3px #d17b0f;
@@ -460,8 +491,6 @@ button {
   font-size: 1.618em;
   font-weight: 800;
   text-align: center;
-  margin-top: 1vh;
-  margin-left: 5vw;
 
   width: auto;
 
