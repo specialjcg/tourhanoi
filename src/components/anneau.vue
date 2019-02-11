@@ -1,7 +1,7 @@
 
 <template>
 
-  <div  class="anneaux ball" :class="num1" :id="nommeid()" :style="chandelarg()" @mousemove="elementDrag($event)" @mousedown="dragElement($event)" @mouseup="closeDragElement()"></div>
+  <div  class="anneaux ball" ref="whoisdragging" :class="num1" :id="nommeid()" :style="chandelarg()" @mousemove="elementDrag($event)" @mousedown="dragElement($event)" @mouseup="closeDragElement()"></div>
 
 </template>
 <script>
@@ -92,7 +92,7 @@ export default {
 
   cursor: move;
   height: 5vh;
-z-index: 4;
+z-index: 2;
   background: radial-gradient(
     circle at 10vw 10vw,
     @rgba-primary-1,
@@ -108,7 +108,7 @@ z-index: 4;
 .ball {
   min-width: auto;
   height: 7vh;
- z-index: 4;
+ z-index: 2;
 margin-top: 1.1vh;
 margin-bottom: 0.7vh;
   position: relative;
@@ -127,14 +127,14 @@ margin-bottom: 0.7vh;
   left: 5%;
   width: 90%;
   height: 90%;
-z-index: 4;
+z-index: 2;
   background: radial-gradient(
     circle at 50% 0px,
     #ffffff,
     rgba(255, 255, 255, 0) 58%
   );
   filter: blur(5px);
- z-index: 4;
+ z-index: 2;
 }
 
 .tordre {

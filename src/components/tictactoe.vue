@@ -1,14 +1,15 @@
 
 <template>
-<div>
-
-<transition-group name="shuffleFast" tag="div" class="posanneau" @dragover.prevent="allowDrop()"  :key="componentKey" >
+<div @mouseup="redesign()">
+<div class="titre"><h3>Tour de Hanoï</h3></div>
+<transition-group name="shuffleFast" tag="div" class="posanneau" @dragover.prevent="allowDrop()"  :key="componentKey" mode="out-in">
   <div v-for="tourdehanoi in tourdehanois" :key="tourdehanoi.id" :id="'div'+tourdehanoi.id" class="touredehanoi" >
  <anneau   :qAnneau="tourdehanoi.id" :aryoudragable=tourdehanoi.anneaudrable  v-if="tourdehanoi. anneaupresentegaltaillenonnul!==0" @selected="drop1($event)" ></anneau>
 <div class="touredehanoi" v-else></div>
 </div>
+<div v-for="n in 3" :class="'tower'+n" :key="'tow'+n"></div>
 </transition-group>
-<div v-for="n in 3" :class="'tower'+n" :key="n"></div>
+
 <div class="nombredecoup">
 
   <h4>Nombre de coup</h4>
@@ -114,8 +115,9 @@ export default {
         document.getElementById(targ).style.top = ''
 
         tranleft = this.posleftAnneau[k] + 'vw'
-
+        document.getElementById(targ).__vue__.whoisdragging = ''
         document.getElementById(targ).style.left = tranleft
+        document.getElementById(targ).className = 'anneaux ball'
       }
     },
     reaffecdragable1 () {
@@ -226,10 +228,10 @@ export default {
         if (i < 5) { h = 10 } else if (i < 10) { h = 0 } else { h = 5 }
         if (this.tourdehanois[i].anneaudrable) {
           if (this.deplace1(i, h)) {
-            this.disqueprochain++; test = false; this.coup++
+            this.disqueprochain++; test = false
           } else {
             if (i < 5) { h = 5 } else if (i < 10) { h = 10 } else { h = 0 }
-            if (this.deplace1(i, h)) { this.disqueprochain++; test = false; this.coup++ } else {
+            if (this.deplace1(i, h)) { this.disqueprochain++; test = false } else {
               this.disqueprochain++
             }
           }
@@ -248,32 +250,44 @@ export default {
         let temp = this.tourdehanois[data1]
         this.$set(this.tourdehanois, data1, this.tourdehanois[target1])
         this.$set(this.tourdehanois, target1, temp)
+        this.coup++
         this.tombe()
         this.redesign()
         return true
       } else { return false }
-    },
-
-    quelAnneau (n) {
-      var n1 = this.index++
-      console.log(n1)
-      this.posi[n] = n
-      return n1
     }
   }
 }
 </script>
 <style lang="less" scoped>
 @import "./font.less";
+.shuffleFast{
+backface-visibility: hidden;
+  z-index: 4;
+
+}
 .shuffleFast-move {
-  transition: transform 1s;
+  /*transition: transform 1s;*/
+  transition: all 600ms ease-in-out 50ms;
+  z-index:3;
 }
 
-.fade-enter-active, .fade-leave-active {
-  transition: opacity .5s;
+/* appearing */
+.shuffleFast-enter-active {
+  transition: all 400ms ease-out;
+   z-index:3;
 }
 
-.fade-enter, .fade-leave-to {
+/* disappearing */
+.shuffleFast-leave-active {
+  transition: all 200ms ease-in;
+  position: absolute;
+  z-index: 3;
+}
+
+/* appear at / disappear to */
+.shuffleFast-enter,
+.shuffleFast-leave-to {
   opacity: 0;
 }
 @nombredor: 1.618em;
@@ -308,17 +322,17 @@ export default {
   font-family: "Merriweather", serif;
   padding: 1vw;
 }
-.nombredecoup2 {
-  position: relative;
+.titre {
+  position: absolute;
+top:0;
+margin: 0;
+  width: 100vw;
+  height: 1vh;
 
-display: inline-block;
-  width: 75px;
-  height: 100px;
-  float: left;
-  margin-right: 5px;
-  margin-top: 1vh;
-  border-radius: 2px;
-background-color:red;
+  margin-left:auto;
+  margin-right: auto;
+font-family: "Merriweather", serif;
+
 }
 .action {
   position: absolute;
@@ -371,8 +385,9 @@ h2 {
 }
 
 h3 {
-  color: @rgba-secondary-1-2;
+  color: @rgba-secondary-1-4;
   font-size: 2.618em;
+  margin:inherit;
 }
 
 h4 {
@@ -387,17 +402,18 @@ small,
 }
 .posanneau        {
  display: flex;
-
+position:absolute;
   flex-flow: column wrap;
   justify-content: flex-start;
   align-items: center;
   align-content: center;
  background-color:@rgba-secondary-2-0;
 position: relative;
-top:8vh;
+top:0vh;
  border-radius: 1vh;
 width: 99vw;
 height: 45vh;
+
 }
 .touredehanoi{
 flex: 0 1 auto;
@@ -406,22 +422,6 @@ flex: 0 1 auto;
  min-width: 33vw;
   min-height: 9vh;
 
-}
-
-.grid-container {
-  display: grid;
-  grid-template-columns: auto auto auto;
-  background-color: @rgba-secondary-1-4;
-  padding: 1vh;
-  grid-auto-rows: minmax(8vh, auto);
-  border-radius: 1vh;
-}
-.grid-item {
-  background-color: @rgba-secondary-1-4;
-  border: 1px solid rgba(0, 0, 0, 0.8);
-  padding: 1px;
-  font-size: 30px;
-  text-align: center;
 }
 
 img {
@@ -438,32 +438,33 @@ img {
 }
 .tower1 {
     position: absolute;
-    top: 11vh;
-    left:16vw;
+    top: 0;
+    left:15vw;
     border-radius: 1vw;
     width: 3vw;
-    height: 50vh;
-    z-index: 0;
+    height: 45vh;
+    z-index: 1;
     background: linear-gradient(to right, #d7b889, #b27315, #966f33);
 }
 .tower2 {
     position: absolute;
-    top: 11vh;
-    left:49vw;
+    top: 0;
+    left:48vw;
     border-radius: 1vw;
     width: 3vw;
-    height: 50vh;
-    z-index: 0;
+    height: 45vh;
+    z-index: 1;
     background: linear-gradient(to right, #d7b889, #b27315, #966f33);
 }
 .tower3 {
     position: absolute;
-    top: 11vh;
-    left:82vw;
+    top: 0;
+    left:81vw;
+
     border-radius: 1vw;
     width: 3vw;
-    height: 50vh;
-    z-index: 0;
+    height: 45vh;
+    z-index: 1;
     background: linear-gradient(to right, #d7b889, #b27315, #966f33);
 }
 .but1{
