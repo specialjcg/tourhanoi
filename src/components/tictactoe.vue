@@ -176,7 +176,7 @@ export default {
           this.$set(this.tourdehanois, k + 1, temp)
         }
       }
-
+      clearInterval(this.timer)
       this.reaffecdragable1()
     },
     testanneauLepluspetit (anneauDeplacer, colonneCible) {
@@ -250,9 +250,12 @@ export default {
         let temp = this.tourdehanois[data1]
         this.$set(this.tourdehanois, data1, this.tourdehanois[target1])
         this.$set(this.tourdehanois, target1, temp)
+
         this.coup++
-        this.tombe()
-        this.redesign()
+        this.timer = setInterval(() => {
+          this.tombe()
+        }, 1000)
+
         return true
       } else { return false }
     }
