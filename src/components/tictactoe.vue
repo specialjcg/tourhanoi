@@ -1,10 +1,12 @@
+/* eslint-disable indent */
 
 <template>
-<div @mouseup="redesign()">
+<div @mouseup="redesign()" v-hammer:panend="redesign">
 <div class="titre"><h3>Tour de Hanoï</h3></div>
+<div v-if="action==='you win'" class="shake-horizontal titre1">{{this.action}}</div>
 <transition-group name="shuffleFast" tag="div" class="posanneau" @dragover.prevent="allowDrop()"  :key="componentKey" mode="out-in">
   <div v-for="tourdehanoi in tourdehanois" :key="tourdehanoi.id" :id="'div'+tourdehanoi.id" class="touredehanoi" >
- <anneau   :qAnneau="tourdehanoi.id" :aryoudragable=tourdehanoi.anneaudrable  v-if="tourdehanoi. anneaupresentegaltaillenonnul!==0" @selected="drop1($event)" ></anneau>
+ <anneau   :qAnneau="tourdehanoi.id" :aryoudragable=tourdehanoi.removableRing  v-if="tourdehanoi. ringInPlaceOfSizeNotNull!==0" @selected="drop1($event)" ></anneau>
 <div class="touredehanoi" v-else></div>
 </div>
 <div v-for="n in 3" :class="'tower'+n" :key="'tow'+n"></div>
@@ -32,7 +34,6 @@ On suppose que cette dernière règle est également respectée dans la configur
 </template>
 <script>
 import anneau from './anneau.vue'
-
 export default {
 
   components: {
@@ -48,7 +49,7 @@ export default {
       action: 'continuer',
       storepos: [],
       storeposprec: [],
-      storeposWin: [],
+      ringPositionWhenSolved: [],
       tourdehanois: [],
       show: true,
       componentKey: 0,
@@ -63,25 +64,25 @@ export default {
     }
   },
   mounted () {
-    this.storeposWin = [3, 6, 9, 12, 15]
+    this.ringPositionWhenSolved = [3, 6, 9, 12, 15]
     this.tourdehanois = []
     this.id = 0
     for (var i = 0; i < 15; i++) {
       let tourdehanoi = {
         id: i,
-        anneaupresentegaltaillenonnul: 0,
-        anneaudrable: ''
+        ringInPlaceOfSizeNotNull: 0,
+        removableRing: ''
 
       }
 
       this.tourdehanois.push(tourdehanoi)
     }
 
-    this.tourdehanois[0].anneaudrable = true
-    this.tourdehanois[0].anneaupresentegaltaillenonnul = 1
+    this.tourdehanois[0].removableRing = true
+    this.tourdehanois[0].ringInPlaceOfSizeNotNull = 1
     this.tourdehanois[0].id = 0
-    for (i = 1; i < 5; i++) { this.tourdehanois[i].anneaudrable = false; this.tourdehanois[i].anneaupresentegaltaillenonnul = i + 1; this.tourdehanois[i].id = i }
-    for (i = 5; i < 15; i++) { this.tourdehanois[i].anneaudrable = false; this.tourdehanois[i].anneaupresentegaltaillenonnul = 0; this.tourdehanois[i].id = i }
+    for (i = 1; i < 5; i++) { this.tourdehanois[i].removableRing = false; this.tourdehanois[i].ringInPlaceOfSizeNotNull = i + 1; this.tourdehanois[i].id = i }
+    for (i = 5; i < 15; i++) { this.tourdehanois[i].removableRing = false; this.tourdehanois[i].ringInPlaceOfSizeNotNull = 0; this.tourdehanois[i].id = i }
   },
   beforeDestroy () {
     clearInterval(this.timer)
@@ -101,11 +102,11 @@ export default {
       ev.preventDefault()
     },
     storePosition () {
-      if ((this.tourdehanois[10].anneaupresentegaltaillenonnul !== 0) &&
-     (this.tourdehanois[11].anneaupresentegaltaillenonnul !== 0) &&
-     (this.tourdehanois[12].anneaupresentegaltaillenonnul !== 0) &&
-     (this.tourdehanois[13].anneaupresentegaltaillenonnul !== 0) &&
-     (this.tourdehanois[14].anneaupresentegaltaillenonnul !== 0)) { return true } else { return false }
+      if ((this.tourdehanois[10].ringInPlaceOfSizeNotNull !== 0) &&
+     (this.tourdehanois[11].ringInPlaceOfSizeNotNull !== 0) &&
+     (this.tourdehanois[12].ringInPlaceOfSizeNotNull !== 0) &&
+     (this.tourdehanois[13].ringInPlaceOfSizeNotNull !== 0) &&
+     (this.tourdehanois[14].ringInPlaceOfSizeNotNull !== 0)) { return true } else { return false }
     },
     redesign () {
       var tranleft = ''
@@ -120,72 +121,65 @@ export default {
         document.getElementById(targ).className = 'anneaux ball'
       }
     },
-    reaffecdragable1 () {
+
+    testIfTheRingIsRingIsMoving () {
       var sianneau = true
-      for (var k = 0; k < 5; k++) {
-        if (this.tourdehanois[k].anneaupresentegaltaillenonnul !== 0) {
-          this.tourdehanois[k].anneaudrable = sianneau
+      for (var numberOfRingsLocation = 0; numberOfRingsLocation < 5; numberOfRingsLocation++) {
+        if (this.tourdehanois[numberOfRingsLocation].ringInPlaceOfSizeNotNull !== 0) {
+          this.tourdehanois[numberOfRingsLocation].removableRing = sianneau
           sianneau = false
         } else {
 
         }
       }
       sianneau = true
-      for (k = 5; k < 10; k++) {
-        if (this.tourdehanois[k].anneaupresentegaltaillenonnul !== 0) {
-          this.tourdehanois[k].anneaudrable = sianneau
+      for (numberOfRingsLocation = 5; numberOfRingsLocation < 10; numberOfRingsLocation++) {
+        if (this.tourdehanois[numberOfRingsLocation].ringInPlaceOfSizeNotNull !== 0) {
+          this.tourdehanois[numberOfRingsLocation].removableRing = sianneau
           sianneau = false
         } else {
 
         }
       }
       sianneau = true
-      for (k = 11; k < 15; k++) {
-        if (this.tourdehanois[k].anneaupresentegaltaillenonnul !== 0) {
-          this.tourdehanois[k].anneaudrable = sianneau
+      for (numberOfRingsLocation = 11; numberOfRingsLocation < 15; numberOfRingsLocation++) {
+        if (this.tourdehanois[numberOfRingsLocation].ringInPlaceOfSizeNotNull !== 0) {
+          this.tourdehanois[numberOfRingsLocation].removableRing = sianneau
           sianneau = false
         } else {
 
         }
       }
     },
-    tombe () {
-      /* var targ1, targfirst, targfinal
-      var test = false
-      targfirst = targ.parentNode.parentNode.id
-      var cibleDiv = Number(targfirst.match(/\d+/g).join('')) */
-
-      for (var k = 0; k < 4; k++) {
-        if ((this.tourdehanois[k].anneaudrable) && (this.tourdehanois[k + 1].anneaupresentegaltaillenonnul === 0)) {
-          let temp = this.tourdehanois[k]
-          this.$set(this.tourdehanois, k, this.tourdehanois[k + 1])
-          this.$set(this.tourdehanois, k + 1, temp)
-        }
+    testIfTheLocationIsValidForMoving (numberOfRingsLocation) {
+      return ((this.tourdehanois[numberOfRingsLocation].removableRing) && (this.tourdehanois[numberOfRingsLocation + 1].ringInPlaceOfSizeNotNull === 0))
+    },
+    ringDisplacementByFallingDown (numberOfRingsLocation) {
+      let temp = this.tourdehanois[numberOfRingsLocation]
+      this.$set(this.tourdehanois, numberOfRingsLocation, this.tourdehanois[numberOfRingsLocation + 1])
+      this.$set(this.tourdehanois, numberOfRingsLocation + 1, temp)
+    },
+    testringDropOnAPositionAndFallsOnTheTarget (numberOfRingsLocation) {
+      if (this.testIfTheLocationIsValidForMoving(numberOfRingsLocation)) {
+        this.ringDisplacementByFallingDown(numberOfRingsLocation)
       }
-      for (k = 5; k < 9; k++) {
-        if ((this.tourdehanois[k].anneaudrable) && (this.tourdehanois[k + 1].anneaupresentegaltaillenonnul === 0)) {
-          let temp = this.tourdehanois[k]
-          this.$set(this.tourdehanois, k, this.tourdehanois[k + 1])
-          this.$set(this.tourdehanois, k + 1, temp)
-        }
-      }
-      for (k = 10; k < 14; k++) {
-        if ((this.tourdehanois[k].anneaudrable) && (this.tourdehanois[k + 1].anneaupresentegaltaillenonnul === 0)) {
-          let temp = this.tourdehanois[k]
-          this.$set(this.tourdehanois, k, this.tourdehanois[k + 1])
-          this.$set(this.tourdehanois, k + 1, temp)
+    },
+    ringDropOnAPositionAndFallsOnTheTarget () {
+      for (var numberOfRingsLocation = 0; numberOfRingsLocation < 14; numberOfRingsLocation++) {
+        if ((numberOfRingsLocation !== 4) && (numberOfRingsLocation !== 9)) {
+          this.testringDropOnAPositionAndFallsOnTheTarget(numberOfRingsLocation)
         }
       }
       clearInterval(this.timer)
-      this.reaffecdragable1()
+      this.testIfTheRingIsRingIsMoving()
     },
     testanneauLepluspetit (anneauDeplacer, colonneCible) {
       var max = 15
       var test1 = true
       if (colonneCible < 4) { max = 5 } else if (colonneCible < 10) { max = 10 } else { max = 15 }
       for (var k = colonneCible; k < max; k++) {
-        if (this.tourdehanois[k].anneaupresentegaltaillenonnul !== 0) {
-          if (this.tourdehanois[k].anneaupresentegaltaillenonnul < this.tourdehanois[anneauDeplacer].anneaupresentegaltaillenonnul) {
+        if (this.tourdehanois[k].ringInPlaceOfSizeNotNull !== 0) {
+          if (this.tourdehanois[k].ringInPlaceOfSizeNotNull < this.tourdehanois[anneauDeplacer].ringInPlaceOfSizeNotNull) {
             k = max
             test1 = false
           } else {
@@ -211,11 +205,11 @@ export default {
           var cibleDiv = Number(elmnt.id.match(/\d+/g).join(''))
           var chgtdisque = 0
           for (var j = 0; j < 15; j++) { if (this.tourdehanois[j].id === cibleDiv) { chgtdisque = j } }
-          if (this.deplace1(chgtdisque, data)) {}
+          if (this.moveARingFromOnePositionToATarget(chgtdisque, data)) {}
         }
       }
       this.redesign()
-      this.reaffecdragable1()
+      this.testIfTheRingIsRingIsMoving()
     },
     deplace_un_par_un () {
       var test = true
@@ -226,12 +220,12 @@ export default {
         var i = 0
         for (var j = 0; j < 15; j++) { if (this.tourdehanois[j].id === this.disqueprochain) { i = j } }
         if (i < 5) { h = 10 } else if (i < 10) { h = 0 } else { h = 5 }
-        if (this.tourdehanois[i].anneaudrable) {
-          if (this.deplace1(i, h)) {
+        if (this.tourdehanois[i].removableRing) {
+          if (this.moveARingFromOnePositionToATarget(i, h)) {
             this.disqueprochain++; test = false
           } else {
             if (i < 5) { h = 5 } else if (i < 10) { h = 10 } else { h = 0 }
-            if (this.deplace1(i, h)) { this.disqueprochain++; test = false } else {
+            if (this.moveARingFromOnePositionToATarget(i, h)) { this.disqueprochain++; test = false } else {
               this.disqueprochain++
             }
           }
@@ -243,18 +237,21 @@ export default {
     },
 
     deplace () {
-      this.timer = setInterval(() => { this.deplace_un_par_un() }, 1000)
+      this.timer = setInterval(() => { this.deplace_un_par_un() }, 1600)
     },
-    deplace1 (data1, target1) {
+
+    moveARingFromOnePositionToATarget (data1, target1) {
       if (this.testanneauLepluspetit(data1, target1)) {
+        if ((target1 === 0) && (data1 > 5)) { this.coup++ }
+        if ((target1 === 5) && ((data1 > 10) || (data1 < 5))) { this.coup++ }
+        if ((target1 === 10) && (data1 < 10)) { this.coup++ }
+
         let temp = this.tourdehanois[data1]
         this.$set(this.tourdehanois, data1, this.tourdehanois[target1])
         this.$set(this.tourdehanois, target1, temp)
-
-        this.coup++
         this.timer = setInterval(() => {
-          this.tombe()
-        }, 1000)
+          this.ringDropOnAPositionAndFallsOnTheTarget()
+        }, 800)
 
         return true
       } else { return false }
@@ -313,10 +310,11 @@ backface-visibility: hidden;
 
 .nombredecoup {
   position: absolute;
-  width: pow(@nombredor, 4);
+  width: pow(@nombredor, 5);
   height: calc(@nombredor*7);
 
-  background-color: @rgba-secondary-2-1;
+  background-color: rgba(210,255,82,1);
+  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(0, 0, 0, 0.8);
   border-radius: 1vw;
 
@@ -337,13 +335,26 @@ margin: 0;
 font-family: "Merriweather", serif;
 
 }
+.titre1 {
+  position: relative;
+top:0;
+margin: 0;
+  width: 50vw;
+  height: 5vh;
+background-color:@rgba-secondary-2-4;
+  margin-left:auto;
+  margin-right: auto;
+font-family: "Merriweather", serif;
+  font-size: 2em;
+}
 .action {
   position: absolute;
   width: pow(@nombredor, 8);
   height: pow(@nombredor, 5);
   left: 23vw;
-  background-color: @rgba-secondary-2-3;
+  background-color: rgba(210,255,82,1);
   border: 1px solid rgba(0, 0, 0, 0.8);
+  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
   border-radius: 1vw;
   color: black;
   vertical-align: middle;
@@ -353,6 +364,8 @@ font-family: "Merriweather", serif;
   font-family: "Merriweather", serif;
   top: 62vh;
   padding: 1vw;
+  padding-top: 0;
+
 }
 
 body {
@@ -363,8 +376,8 @@ body {
 }
 
 p {
-  font-size: small;
-  margin-bottom: 1.3em;
+  font-size: 1em;
+
 }
 
 h1,
@@ -394,7 +407,7 @@ h3 {
 }
 
 h4 {
-  color: @rgba-secondary-1-2;
+  color: @rgba-secondary-1-4;
   margin-top: 0em;
   font-size: 1.618em;
 }
@@ -410,7 +423,8 @@ position:absolute;
   justify-content: flex-start;
   align-items: center;
   align-content: center;
- background-color:@rgba-secondary-2-0;
+ background-color:rgba(241,231,103,1);
+ box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
 position: relative;
 top:0vh;
  border-radius: 1vh;
@@ -513,5 +527,257 @@ button:hover {
   );
   transform-origin: 0% 50%;
   transform: rotateY(4deg) rotateZ(1deg);
+}
+.shake-horizontal {
+  -webkit-animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) infinite;
+animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) infinite;
+}
+/* ----------------------------------------------
+ * Generated by Animista on 2019-2-11 18:32:51
+ * w: http://animista.net, t: @cssanimista
+ * ---------------------------------------------- */
+
+/**
+ * ----------------------------------------
+ * animation shake-horizontal
+ * ----------------------------------------
+ */
+@-webkit-keyframes shake-horizontal {
+  0%,
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70% {
+    -webkit-transform: translateX(-10px);
+            transform: translateX(-10px);
+  }
+  20%,
+  40%,
+  60% {
+    -webkit-transform: translateX(10px);
+            transform: translateX(10px);
+  }
+  80% {
+    -webkit-transform: translateX(8px);
+            transform: translateX(8px);
+  }
+  90% {
+    -webkit-transform: translateX(-8px);
+            transform: translateX(-8px);
+  }
+}
+@keyframes shake-horizontal {
+  0%,
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70% {
+    -webkit-transform: translateX(-10px);
+            transform: translateX(-10px);
+  }
+  20%,
+  40%,
+  60% {
+    -webkit-transform: translateX(10px);
+            transform: translateX(10px);
+  }
+  80% {
+    -webkit-transform: translateX(8px);
+            transform: translateX(8px);
+  }
+  90% {
+    -webkit-transform: translateX(-8px);
+            transform: translateX(-8px);
+  }
+}
+@media only screen and (min-width: 340px) {
+  .nombredecoup {
+  position: relative;
+  width: pow(@nombredor, 4);
+  height: calc(@nombredor*6);
+
+  background-color: rgba(210,255,82,1);
+  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-radius: 1vw;
+
+  text-align: center;
+   top: 1vh;
+  font-family: "Merriweather", serif;
+  padding: 1vw;
+}
+.but1{
+  top:70vh;
+  left:0;
+}
+.but2{
+  top:70vh;
+  left:40vw;
+}
+button{
+
+ font-size: .8em;
+}
+.action {
+  position: absolute;
+  width: pow(@nombredor, 5.5);
+  height: pow(@nombredor, 5.1);
+  left: 36vw;
+  background-color: rgba(210,255,82,1);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
+  border-radius: 1vw;
+  color: black;
+  vertical-align: middle;
+  display: inline-block;
+  line-height: 1.2; /* on rétablit le line-height */
+  text-align: left;
+  font-family: "Merriweather", serif;
+  top: 40vh;
+  padding: 1vw;
+  padding-top: 0;
+
+}
+p{
+font-size: 0.6em;
+
+}
+.nombredecoup h1 {
+  font-size:inherit;
+  color: black;
+  margin: inherit;
+  font-size: pow(@nombredor, 3);
+}
+.posanneau  {
+  height:30vh;
+}
+.tower1 {
+
+    height: 30vh;
+
+}
+.tower2 {
+
+    height: 30vh;
+
+}
+.tower3 {
+
+    height: 30vh;
+
+}
+.touredehanoi{
+
+  min-height: 6vh;
+
+}
+}
+
+@media only screen and (min-width: 640px) {
+ .nombredecoup {
+  position: absolute;
+  width: pow(@nombredor, 5);
+  height: calc(@nombredor*7);
+
+  background-color: rgba(210,255,82,1);
+  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-radius: 1vw;
+
+  text-align: center;
+   top: 62vh;
+  font-family: "Merriweather", serif;
+  padding: 1vw;
+}
+.but1{
+  top:90vh;
+  left:10vw;
+}
+.but2{
+  top:90vh;
+  left:40vw;
+}
+.action {
+  position: absolute;
+  width: pow(@nombredor, 8);
+  height: pow(@nombredor, 5);
+  left: 23vw;
+  background-color: rgba(210,255,82,1);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
+  border-radius: 1vw;
+  color: black;
+  vertical-align: middle;
+  display: inline-block;
+  line-height: 1.2; /* on rétablit le line-height */
+  text-align: left;
+  font-family: "Merriweather", serif;
+  top: 62vh;
+  padding: 1vw;
+  padding-top: 0;
+
+}
+p {
+  font-size: 1em;
+
+}
+button{
+ font-size: 1.618em;
+}
+.nombredecoup h1 {
+  color: black;
+  margin-top: 0;
+  font-size: 6.7em;
+}
+.posanneau{
+ height:45vh;}
+
+.tower1 {
+    position: absolute;
+    top: 0;
+    left:15vw;
+    border-radius: 1vw;
+    width: 3vw;
+    height: 45vh;
+    z-index: 1;
+    background: linear-gradient(to right, #d7b889, #b27315, #966f33);
+}
+.tower2 {
+    position: absolute;
+    top: 0;
+    left:48vw;
+    border-radius: 1vw;
+    width: 3vw;
+    height: 45vh;
+    z-index: 1;
+    background: linear-gradient(to right, #d7b889, #b27315, #966f33);
+}
+.tower3 {
+    position: absolute;
+    top: 0;
+    left:81vw;
+
+    border-radius: 1vw;
+    width: 3vw;
+    height: 45vh;
+    z-index: 1;
+    background: linear-gradient(to right, #d7b889, #b27315, #966f33);
+}
+.touredehanoi{
+flex: 0 1 auto;
+
+  align-self: auto;
+ min-width: 33vw;
+  min-height: 9vh;
+
+}
 }
 </style>

@@ -3,8 +3,10 @@
 import Vue from 'vue'
 import App from './App'
 
-Vue.config.productionTip = false
-
+import {
+  VueHammer
+} from 'vue2-hammer'
+Vue.use(VueHammer)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

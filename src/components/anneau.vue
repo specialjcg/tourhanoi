@@ -1,7 +1,7 @@
 
 <template>
 
-  <div  class="anneaux ball" ref="whoisdragging" :class="num1" :id="nommeid()" :style="chandelarg()" @mousemove="elementDrag($event)" @mousedown="dragElement($event)" @mouseup="closeDragElement()"></div>
+  <div  class="anneaux ball" ref="whoisdragging" :class="num1" :id="nommeid()" :style="chandelarg()"  v-hammer:panstart="dragElementTouch" v-hammer:pan="elementDragTouch" @mousemove="elementDrag($event)" @mousedown="dragElement($event)" v-hammer:panend="closeDragElementTouch" @mouseup="closeDragElement()"></div>
 
 </template>
 <script>
@@ -24,7 +24,21 @@ export default {
 
     }
   },
-
+  mounted () {
+    /* for (var i = 0; i < 5; i++) {
+      var el = document.getElementsByClassName('anneaux ball')[i]
+      var self = this
+      el.addEventListener('touchstart', function (e) {
+        self.dragElementTouch(e)
+      })
+      el.addEventListener('touchend', function (e) {
+        self.closeDragElementTouch(e)
+      })
+      el.addEventListener('touchmove', function (e) {
+        self.elementDragTouch(e)
+      })
+    } */
+  },
   methods: {
 
     closeDragElement: function () {
@@ -34,6 +48,15 @@ export default {
       this.num1 = ''
       this.whoisdragging = ''
     },
+    closeDragElementTouch: function () {
+      /* stop moving when mouse button is released: */
+      if (this.whoisdragging !== '') {
+        this.$emit('selected', document.getElementById(this.whoisdragging))
+        this.dragging = false
+        this.num1 = ''
+        this.whoisdragging = ''
+      }
+    },
     nommeid () {
       var index = 'drag' + this.qAnneau
       return index
@@ -41,7 +64,7 @@ export default {
     elementDrag (e) {
       /* e = e || window.event; */
 
-      if ((this.whoisdragging !== '') && this.dragging && this.aryoudragable) {
+      if ((this.whoisdragging !== '') && this.dragging && this.aryoudragable && e !== undefined) {
         this.pos1 = 0
         this.pos2 = 0
 
@@ -58,6 +81,40 @@ export default {
         /*  if (this.elmnt12.left > 1000) { decal = 990 } else if (this.elmnt12.left > 500) { decal = 500 } */
         this.elmnt1.style.top = -this.elmnt12.top - this.elmnt12.height / 2 + e.clientY + 'px'
         this.elmnt1.style.left = -decal - this.elmnt12.width / 2 + e.clientX + 'px'
+      }
+    },
+    elementDragTouch (e) {
+      /* e = e || window.event; */
+
+      if ((this.whoisdragging !== '') && this.dragging && this.aryoudragable && e !== undefined) {
+        this.pos1 = 0
+        this.pos2 = 0
+
+        // calculate the new cursor position:
+        this.pos1 = this.pos3 - e.center.x
+        this.pos2 = this.pos4 - e.center.y
+        this.pos3 = e.clientX
+        this.pos4 = e.clientY
+        var decal = 0
+        // set the element's new position:
+        if (this.pos1 < 0) { this.num1 = 'anneauxhover2' } else { this.num1 = 'anneauxhover' }
+        if (this.elmnt12.left < document.body.clientWidth / 3) { decal = 0 } else if (this.elmnt12.left < (2 * document.body.clientWidth) / 3) { decal = (document.body.clientWidth) / 3 } else { decal = (2 * document.body.clientWidth) / 3 }
+
+        /*  if (this.elmnt12.left > 1000) { decal = 990 } else if (this.elmnt12.left > 500) { decal = 500 } */
+        this.elmnt1.style.top = -this.elmnt12.top - this.elmnt12.height / 2 + e.center.y + 'px'
+        this.elmnt1.style.left = -decal - this.elmnt12.width / 2 + e.center.x + 'px'
+      }
+    },
+    dragElementTouch: function (e) {
+      if (this.aryoudragable && e !== undefined) {
+        this.whoisdragging = e.target.id
+        this.elmnt1 = document.getElementById(e.target.id)
+        this.elmnt12 = this.elmnt1.getBoundingClientRect()
+        this.pos3 = e.center.x
+        this.pos4 = e.center.y
+        this.dragging = true
+        // call a function whenever the cursor moves:
+        /* document.onmousemove = self.elementDrag */
       }
     },
     dragElement: function (e) {
@@ -91,7 +148,7 @@ export default {
   position: relative;
 
   cursor: move;
-  height: 5vh;
+  height: 9vh;
 z-index: 2;
   background: radial-gradient(
     circle at 10vw 10vw,
@@ -107,10 +164,10 @@ z-index: 2;
 
 .ball {
   min-width: auto;
-  height: 7vh;
+
  z-index: 2;
-margin-top: 1.1vh;
-margin-bottom: 0.7vh;
+margin-top: 0.01vh;
+margin-bottom: 0.01vh;
   position: relative;
   background: radial-gradient(
     circle at 50% 120%,
@@ -145,4 +202,18 @@ z-index: 2;
   transform: skew(10deg, 0deg);
 
 }
+@media only screen and (min-width: 340px) {
+.ball{
+
+height: 5.7vh;
+
+}
+
+}@media only screen and (min-width: 640px) {
+.ball{
+height: 8.5vh;
+
+}
+}
+
 </style>
