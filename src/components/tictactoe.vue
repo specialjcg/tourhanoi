@@ -60,7 +60,8 @@ export default {
       disqueprochain: 0,
       largeurAnneau: [50, 60, 70, 80, 90],
       posleftAnneau: [8.5, 7, 5, 3, 1.5],
-      essai: true
+      essai: true,
+      colonneCiblemap: Map
     }
   },
   mounted () {
@@ -95,12 +96,13 @@ export default {
 
     numdiv (n1) {
       var indexint = n1
-      /* this.index1=indexint; */
+
       return 'div' + indexint
     },
     allowDrop (ev) {
       ev.preventDefault()
     },
+
     storePosition () {
       if ((this.tourdehanois[10].ringInPlaceOfSizeNotNull !== 0) &&
      (this.tourdehanois[11].ringInPlaceOfSizeNotNull !== 0) &&
@@ -121,36 +123,30 @@ export default {
         document.getElementById(targ).className = 'anneaux ball'
       }
     },
+    assignToTheRingIfItIsDisplaceable: (myTourdehanoi) => {
+      return (numberOfRingsLocation) => {
+        return (sianneau2) => {
+          if (myTourdehanoi[numberOfRingsLocation].ringInPlaceOfSizeNotNull !== 0) {
+            myTourdehanoi[numberOfRingsLocation].removableRing = sianneau2
+            sianneau2 = false
+          } else {
 
-    testIfTheRingIsRingIsMoving () {
-      var sianneau = true
-      for (var numberOfRingsLocation = 0; numberOfRingsLocation < 5; numberOfRingsLocation++) {
-        if (this.tourdehanois[numberOfRingsLocation].ringInPlaceOfSizeNotNull !== 0) {
-          this.tourdehanois[numberOfRingsLocation].removableRing = sianneau
-          sianneau = false
-        } else {
-
-        }
-      }
-      sianneau = true
-      for (numberOfRingsLocation = 5; numberOfRingsLocation < 10; numberOfRingsLocation++) {
-        if (this.tourdehanois[numberOfRingsLocation].ringInPlaceOfSizeNotNull !== 0) {
-          this.tourdehanois[numberOfRingsLocation].removableRing = sianneau
-          sianneau = false
-        } else {
-
-        }
-      }
-      sianneau = true
-      for (numberOfRingsLocation = 11; numberOfRingsLocation < 15; numberOfRingsLocation++) {
-        if (this.tourdehanois[numberOfRingsLocation].ringInPlaceOfSizeNotNull !== 0) {
-          this.tourdehanois[numberOfRingsLocation].removableRing = sianneau
-          sianneau = false
-        } else {
-
+          }
+          return sianneau2
         }
       }
     },
+    iTestIfNumberOfRingsLocationIsEqualTo4Or9: (numberOfRingsLocation) => {
+      return ((numberOfRingsLocation === 4) || (numberOfRingsLocation === 9))
+    },
+    testIfTheRingIsRingIsMoving () {
+      var sianneau = true
+      for (var numberOfRingsLocation = 0; numberOfRingsLocation < 15; numberOfRingsLocation++) {
+        sianneau = this.assignToTheRingIfItIsDisplaceable(this.tourdehanois)(numberOfRingsLocation)(sianneau)
+        if (this.iTestIfNumberOfRingsLocationIsEqualTo4Or9(numberOfRingsLocation)) { sianneau = true }
+      }
+    },
+
     testIfTheLocationIsValidForMoving (numberOfRingsLocation) {
       return ((this.tourdehanois[numberOfRingsLocation].removableRing) && (this.tourdehanois[numberOfRingsLocation + 1].ringInPlaceOfSizeNotNull === 0))
     },
@@ -166,31 +162,43 @@ export default {
     },
     ringDropOnAPositionAndFallsOnTheTarget () {
       for (var numberOfRingsLocation = 0; numberOfRingsLocation < 14; numberOfRingsLocation++) {
-        if ((numberOfRingsLocation !== 4) && (numberOfRingsLocation !== 9)) {
+        if (!this.iTestIfNumberOfRingsLocationIsEqualTo4Or9(numberOfRingsLocation)) {
           this.testringDropOnAPositionAndFallsOnTheTarget(numberOfRingsLocation)
         }
       }
       clearInterval(this.timer)
       this.testIfTheRingIsRingIsMoving()
     },
-    testanneauLepluspetit (anneauDeplacer, colonneCible) {
-      var max = 15
-      var test1 = true
-      if (colonneCible < 4) { max = 5 } else if (colonneCible < 10) { max = 10 } else { max = 15 }
-      for (var k = colonneCible; k < max; k++) {
-        if (this.tourdehanois[k].ringInPlaceOfSizeNotNull !== 0) {
-          if (this.tourdehanois[k].ringInPlaceOfSizeNotNull < this.tourdehanois[anneauDeplacer].ringInPlaceOfSizeNotNull) {
-            k = max
-            test1 = false
-          } else {
-            test1 = true
-            k = max
+
+    testanneauLepluspetit: (matourdehanoi) => {
+      return (anneauDeplacer) => {
+        return (colonneCible) => {
+          return () => {
+            var colonneCiblemap = new Map()
+            colonneCiblemap.set(0, 5).set(1, 5).set(2, 5).set(3, 5).set(4, 5).set(5, 10).set(6, 10).set(7, 10).set(8, 10).set(9, 10)
+              .set(10, 15)
+              .set(11, 15)
+              .set(12, 15)
+              .set(13, 15)
+              .set(14, 15)
+
+            var test1 = true
+
+            for (var k = colonneCible; k < colonneCiblemap.get(colonneCible); k++) {
+              if (matourdehanoi[k].ringInPlaceOfSizeNotNull !== 0) {
+                if (matourdehanoi[k].ringInPlaceOfSizeNotNull < matourdehanoi[anneauDeplacer].ringInPlaceOfSizeNotNull) {
+                  test1 = false
+                } else {
+                  test1 = true
+                }
+                k = colonneCiblemap.get(colonneCible)
+              }
+            }
+            return test1
           }
         }
       }
-      return test1
     },
-
     drop1 (ev) {
       if (ev != null) {
         var elmnt = ev
@@ -199,13 +207,14 @@ export default {
 
         document.onmouseup = null
         document.onmousemove = null
+
         if (ev.offsetLeft < document.body.clientWidth / 3) { data = 0 } else if (ev.offsetLeft < (2 * document.body.clientWidth) / 3) { data = 5 } else { data = 10 }
 
         if (elmnt !== '') {
           var cibleDiv = Number(elmnt.id.match(/\d+/g).join(''))
           var chgtdisque = 0
           for (var j = 0; j < 15; j++) { if (this.tourdehanois[j].id === cibleDiv) { chgtdisque = j } }
-          if (this.moveARingFromOnePositionToATarget(chgtdisque, data)) {}
+          this.moveARingFromOnePositionToATarget(chgtdisque, data)
         }
       }
       this.redesign()
@@ -213,19 +222,34 @@ export default {
     },
     deplace_un_par_un () {
       var test = true
-      while ((test) && (this.action !== 'you win')) {
-        var h = 0
 
+      var targetMapColumnSkipsTwoColumns = new Map()
+      targetMapColumnSkipsTwoColumns.set(0, 10).set(1, 10).set(2, 10).set(3, 10).set(4, 10).set(5, 0).set(6, 0).set(7, 0).set(8, 0).set(9, 0)
+        .set(10, 5)
+        .set(11, 5)
+        .set(12, 5)
+        .set(13, 5)
+        .set(14, 5)
+
+      var targetColumnMapSkipsAColumn = new Map()
+      targetColumnMapSkipsAColumn.set(0, 5).set(1, 5).set(2, 5).set(3, 5).set(4, 5).set(5, 10).set(6, 10).set(7, 10).set(8, 10).set(9, 10)
+        .set(10, 0)
+        .set(11, 0)
+        .set(12, 0)
+        .set(13, 0)
+        .set(14, 0)
+
+      while ((test) && (this.action !== 'you win')) {
         if (this.disqueprochain > 4) { this.disqueprochain = 0 }
         var i = 0
         for (var j = 0; j < 15; j++) { if (this.tourdehanois[j].id === this.disqueprochain) { i = j } }
-        if (i < 5) { h = 10 } else if (i < 10) { h = 0 } else { h = 5 }
+
         if (this.tourdehanois[i].removableRing) {
-          if (this.moveARingFromOnePositionToATarget(i, h)) {
+          if (this.moveARingFromOnePositionToATarget(i, targetMapColumnSkipsTwoColumns.get(i))) {
             this.disqueprochain++; test = false
           } else {
-            if (i < 5) { h = 5 } else if (i < 10) { h = 10 } else { h = 0 }
-            if (this.moveARingFromOnePositionToATarget(i, h)) { this.disqueprochain++; test = false } else {
+
+            if (this.moveARingFromOnePositionToATarget(i, targetColumnMapSkipsAColumn.get(i))) { this.disqueprochain++; test = false } else {
               this.disqueprochain++
             }
           }
@@ -241,7 +265,7 @@ export default {
     },
 
     moveARingFromOnePositionToATarget (data1, target1) {
-      if (this.testanneauLepluspetit(data1, target1)) {
+      if (this.testanneauLepluspetit(this.tourdehanois)(data1)(target1)()) {
         if ((target1 === 0) && (data1 > 5)) { this.coup++ }
         if ((target1 === 5) && ((data1 > 10) || (data1 < 5))) { this.coup++ }
         if ((target1 === 10) && (data1 < 10)) { this.coup++ }
@@ -260,7 +284,9 @@ export default {
 }
 </script>
 <style lang="less" scoped>
+
 @import "./font.less";
+
 .shuffleFast{
 backface-visibility: hidden;
   z-index: 4;
@@ -291,29 +317,12 @@ backface-visibility: hidden;
   opacity: 0;
 }
 @nombredor: 1.618em;
-
-.color-primary-0 {
-  color: #aaa639;
-} /* Main Primary color */
-.color-primary-1 {
-  color: #333322;
-}
-.color-primary-2 {
-  color: #6f6d37;
-}
-.color-primary-3 {
-  color: #e5df26;
-}
-.color-primary-4 {
-  color: #fff701;
-}
-
 .nombredecoup {
   position: absolute;
   width: pow(@nombredor, 5);
   height: calc(@nombredor*7);
 
-  background-color: rgba(210,255,82,1);
+  background-color: @color1;
   box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(0, 0, 0, 0.8);
   border-radius: 1vw;
@@ -341,7 +350,7 @@ top:0;
 margin: 0;
   width: 50vw;
   height: 5vh;
-background-color:@rgba-secondary-2-4;
+background-color:@color5;
   margin-left:auto;
   margin-right: auto;
 font-family: "Merriweather", serif;
@@ -352,7 +361,7 @@ font-family: "Merriweather", serif;
   width: pow(@nombredor, 8);
   height: pow(@nombredor, 5);
   left: 23vw;
-  background-color: rgba(210,255,82,1);
+  background-color:@color1;
   border: 1px solid rgba(0, 0, 0, 0.8);
   box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
   border-radius: 1vw;
@@ -396,18 +405,18 @@ h1 {
 }
 
 h2 {
-  color: @rgba-secondary-1-2;
+  color: @color5;
   font-size: 4.236em;
 }
 
 h3 {
-  color: @rgba-secondary-1-4;
+  color: @color5;
   font-size: 2.618em;
   margin:inherit;
 }
 
 h4 {
-  color: @rgba-secondary-1-4;
+  color: @color5;
   margin-top: 0em;
   font-size: 1.618em;
 }
@@ -423,7 +432,7 @@ position:absolute;
   justify-content: flex-start;
   align-items: center;
   align-content: center;
- background-color:rgba(241,231,103,1);
+ background-color:@color1;
  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
 position: relative;
 top:0vh;
@@ -604,7 +613,7 @@ animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) infini
   width: pow(@nombredor, 4);
   height: calc(@nombredor*6);
 
-  background-color: rgba(210,255,82,1);
+  background-color:@color1;
   box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(0, 0, 0, 0.8);
   border-radius: 1vw;
@@ -631,7 +640,7 @@ button{
   width: pow(@nombredor, 5.5);
   height: pow(@nombredor, 5.1);
   left: 36vw;
-  background-color: rgba(210,255,82,1);
+  background-color:@color1;
   border: 1px solid rgba(0, 0, 0, 0.8);
   box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
   border-radius: 1vw;
@@ -687,7 +696,7 @@ font-size: 0.6em;
   width: pow(@nombredor, 5);
   height: calc(@nombredor*7);
 
-  background-color: rgba(210,255,82,1);
+  background-color: @color1;
   box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
   border: 1px solid rgba(0, 0, 0, 0.8);
   border-radius: 1vw;
@@ -710,7 +719,7 @@ font-size: 0.6em;
   width: pow(@nombredor, 8);
   height: pow(@nombredor, 5);
   left: 23vw;
-  background-color: rgba(210,255,82,1);
+  background-color:@color1;
   border: 1px solid rgba(0, 0, 0, 0.8);
   box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
   border-radius: 1vw;

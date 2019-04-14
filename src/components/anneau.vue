@@ -25,19 +25,7 @@ export default {
     }
   },
   mounted () {
-    /* for (var i = 0; i < 5; i++) {
-      var el = document.getElementsByClassName('anneaux ball')[i]
-      var self = this
-      el.addEventListener('touchstart', function (e) {
-        self.dragElementTouch(e)
-      })
-      el.addEventListener('touchend', function (e) {
-        self.closeDragElementTouch(e)
-      })
-      el.addEventListener('touchmove', function (e) {
-        self.elementDragTouch(e)
-      })
-    } */
+
   },
   methods: {
 
@@ -84,23 +72,19 @@ export default {
       }
     },
     elementDragTouch (e) {
-      /* e = e || window.event; */
-
       if ((this.whoisdragging !== '') && this.dragging && this.aryoudragable && e !== undefined) {
         this.pos1 = 0
         this.pos2 = 0
 
-        // calculate the new cursor position:
         this.pos1 = this.pos3 - e.center.x
         this.pos2 = this.pos4 - e.center.y
         this.pos3 = e.clientX
         this.pos4 = e.clientY
         var decal = 0
-        // set the element's new position:
+
         if (this.pos1 < 0) { this.num1 = 'anneauxhover2' } else { this.num1 = 'anneauxhover' }
         if (this.elmnt12.left < document.body.clientWidth / 3) { decal = 0 } else if (this.elmnt12.left < (2 * document.body.clientWidth) / 3) { decal = (document.body.clientWidth) / 3 } else { decal = (2 * document.body.clientWidth) / 3 }
 
-        /*  if (this.elmnt12.left > 1000) { decal = 990 } else if (this.elmnt12.left > 500) { decal = 500 } */
         this.elmnt1.style.top = -this.elmnt12.top - this.elmnt12.height / 2 + e.center.y + 'px'
         this.elmnt1.style.left = -decal - this.elmnt12.width / 2 + e.center.x + 'px'
       }
@@ -113,8 +97,6 @@ export default {
         this.pos3 = e.center.x
         this.pos4 = e.center.y
         this.dragging = true
-        // call a function whenever the cursor moves:
-        /* document.onmousemove = self.elementDrag */
       }
     },
     dragElement: function (e) {
@@ -125,8 +107,6 @@ export default {
         this.pos3 = e.clientX
         this.pos4 = e.clientY
         this.dragging = true
-        // call a function whenever the cursor moves:
-        /* document.onmousemove = self.elementDrag */
       }
     },
     chandelarg () {
@@ -152,7 +132,7 @@ export default {
 z-index: 2;
   background: radial-gradient(
     circle at 10vw 10vw,
-    @rgba-primary-1,
+    #ffffff,
     rgb(104, 99, 99)
   );
  transform: translateZ(0);
