@@ -1,35 +1,33 @@
 /* eslint-disable indent */
 
 <template>
-<div @mouseup="redesign()" v-hammer:panend="redesign">
-<div class="titre"><h3>Tour de Hanoï</h3></div>
-<div v-if="action==='you win'" class="shake-horizontal titre1">{{this.action}}</div>
-<transition-group name="shuffleFast" tag="div" class="posanneau" @dragover.prevent="allowDrop()"  :key="componentKey" mode="out-in">
-  <div v-for="tourdehanoi in tourdehanois" :key="tourdehanoi.id" :id="'div'+tourdehanoi.id" class="touredehanoi" >
- <anneau   :qAnneau="tourdehanoi.id" :aryoudragable=tourdehanoi.removableRing  v-if="tourdehanoi. ringInPlaceOfSizeNotNull!==0" @selected="drop1($event)" ></anneau>
-<div class="touredehanoi" v-else></div>
-</div>
-<div v-for="n in 3" :class="'tower'+n" :key="'tow'+n"></div>
-</transition-group>
+  <div @mouseup="redesign()" v-hammer:panend="redesign">
+    <div class="titre">
+      <h3>Tour de Hanoï</h3>
+    </div>
+    <div v-if="action==='you win'" class="shake-horizontal titre1">{{this.action}}</div>
+    <transition-group name="shuffleFast" tag="div" class="posanneau" @dragover.prevent="allowDrop()" :key="componentKey" mode="out-in">
+      <div v-for="tourdehanoi in tourdehanois" :key="tourdehanoi.id" :id="'div'+tourdehanoi.id" class="touredehanoi">
+        <anneau :qAnneau="tourdehanoi.id" :aryoudragable=tourdehanoi.removableRing v-if="tourdehanoi. ringInPlaceOfSizeNotNull!==0" @selected="drop1($event)"></anneau>
+        <div class="touredehanoi" v-else></div>
+      </div>
+      <div v-for="n in 3" :class="'tower'+n" :key="'tow'+n"></div>
+    </transition-group>
 
-<div class="nombredecoup">
+    <div class="nombredecoup">
 
-  <h4>Nombre de coup</h4>
-  <h1>{{coup}}</h1>
+      <h4>Nombre de coup</h4>
+      <h1>{{coup}}</h1>
 
+    </div>
+
+    <div class="action">
+      <p>
+        <a href="https://fr.wikipedia.org/wiki/Tours_de_Hanoï" target="_blank" noopener noreferrer>Modèle d'une tour de Hanoï </a><br> Les tours de Hanoï (originellement, la tour d'Hanoïa) sont un jeu de réflexion imaginé par le mathématicien français Édouard Lucas, et consistant à déplacer des disques de diamètres différents d'une tour de « départ » à une tour d'« arrivée » en passant par une tour « intermédiaire », et ceci en un minimum de coups, tout en respectant les règles suivantes : <br> on ne peut déplacer plus d'un disque à la fois ;<br> on ne peut placer un disque que sur un autre disque plus grand que lui ou sur un emplacement vide. <br> On suppose que cette dernière règle est également respectée dans la configuration de départ.</p>
+    </div>
+    <button class="but1" @click.prevent="deplace()">Solution Optimale</button>
+    <button class="but2" @click.prevent="deplace_un_par_un()">Déplacer un par un (itératif) {{this.action}}</button>
   </div>
-
-<div class="action"><p>
-<a href="https://fr.wikipedia.org/wiki/Tours_de_Hanoï" target="_blank" noopener noreferrer >Modèle d'une tour de Hanoï </a><br>
-
-Les tours de Hanoï (originellement, la tour d'Hanoïa) sont un jeu de réflexion imaginé par le mathématicien français Édouard Lucas, et consistant à déplacer des disques de diamètres différents d'une tour de « départ » à une tour d'« arrivée » en passant par une tour « intermédiaire », et ceci en un minimum de coups, tout en respectant les règles suivantes : <br>
-
-on ne peut déplacer plus d'un disque à la fois ;<br>
-on ne peut placer un disque que sur un autre disque plus grand que lui ou sur un emplacement vide. <br>
-On suppose que cette dernière règle est également respectée dans la configuration de départ.</p></div>
- <button class="but1" @click.prevent="deplace()">Solution Optimale</button>
-  <button class="but2" @click.prevent="deplace_un_par_un()">Déplacer un par un (itératif) {{this.action}}</button>
-</div>
 
 </template>
 <script>
@@ -105,10 +103,10 @@ export default {
 
     storePosition () {
       if ((this.tourdehanois[10].ringInPlaceOfSizeNotNull !== 0) &&
-     (this.tourdehanois[11].ringInPlaceOfSizeNotNull !== 0) &&
-     (this.tourdehanois[12].ringInPlaceOfSizeNotNull !== 0) &&
-     (this.tourdehanois[13].ringInPlaceOfSizeNotNull !== 0) &&
-     (this.tourdehanois[14].ringInPlaceOfSizeNotNull !== 0)) { return true } else { return false }
+        (this.tourdehanois[11].ringInPlaceOfSizeNotNull !== 0) &&
+        (this.tourdehanois[12].ringInPlaceOfSizeNotNull !== 0) &&
+        (this.tourdehanois[13].ringInPlaceOfSizeNotNull !== 0) &&
+        (this.tourdehanois[14].ringInPlaceOfSizeNotNull !== 0)) { return true } else { return false }
     },
     redesign () {
       var tranleft = ''
@@ -248,7 +246,6 @@ export default {
           if (this.moveARingFromOnePositionToATarget(i, targetMapColumnSkipsTwoColumns.get(i))) {
             this.disqueprochain++; test = false
           } else {
-
             if (this.moveARingFromOnePositionToATarget(i, targetColumnMapSkipsAColumn.get(i))) { this.disqueprochain++; test = false } else {
               this.disqueprochain++
             }
@@ -284,24 +281,22 @@ export default {
 }
 </script>
 <style lang="less" scoped>
+@import './font.less';
 
-@import "./font.less";
-
-.shuffleFast{
-backface-visibility: hidden;
+.shuffleFast {
+  backface-visibility: hidden;
   z-index: 4;
-
 }
 .shuffleFast-move {
   /*transition: transform 1s;*/
   transition: all 600ms ease-in-out 50ms;
-  z-index:3;
+  z-index: 3;
 }
 
 /* appearing */
 .shuffleFast-enter-active {
   transition: all 400ms ease-out;
-   z-index:3;
+  z-index: 3;
 }
 
 /* disappearing */
@@ -328,32 +323,31 @@ backface-visibility: hidden;
   border-radius: 1vw;
 
   text-align: center;
-   top: 62vh;
-  font-family: "Merriweather", serif;
+  top: 62vh;
+  font-family: 'Merriweather', serif;
   padding: 1vw;
 }
 .titre {
   position: absolute;
-top:0;
-margin: 0;
+  top: 0;
+  margin: 0;
   width: 100vw;
   height: 1vh;
 
-  margin-left:auto;
+  margin-left: auto;
   margin-right: auto;
-font-family: "Merriweather", serif;
-
+  font-family: 'Merriweather', serif;
 }
 .titre1 {
   position: relative;
-top:0;
-margin: 0;
+  top: 0;
+  margin: 0;
   width: 50vw;
   height: 5vh;
-background-color:@color5;
-  margin-left:auto;
+  background-color: @color5;
+  margin-left: auto;
   margin-right: auto;
-font-family: "Merriweather", serif;
+  font-family: 'Merriweather', serif;
   font-size: 2em;
 }
 .action {
@@ -361,7 +355,7 @@ font-family: "Merriweather", serif;
   width: pow(@nombredor, 8);
   height: pow(@nombredor, 5);
   left: 23vw;
-  background-color:@color1;
+  background-color: @color1;
   border: 1px solid rgba(0, 0, 0, 0.8);
   box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
   border-radius: 1vw;
@@ -370,23 +364,21 @@ font-family: "Merriweather", serif;
   display: inline-block;
   line-height: 1.2; /* on rétablit le line-height */
   text-align: left;
-  font-family: "Merriweather", serif;
+  font-family: 'Merriweather', serif;
   top: 62vh;
   padding: 1vw;
   padding-top: 0;
-
 }
 
 body {
   background-color: white;
-  font-family: "Merriweather", serif;
+  font-family: 'Merriweather', serif;
 
   color: black;
 }
 
 p {
   font-size: 1em;
-
 }
 
 h1,
@@ -412,7 +404,7 @@ h2 {
 h3 {
   color: @color5;
   font-size: 2.618em;
-  margin:inherit;
+  margin: inherit;
 }
 
 h4 {
@@ -425,29 +417,27 @@ small,
 .font_small {
   font-size: 0.618em;
 }
-.posanneau        {
- display: flex;
-position:absolute;
+.posanneau {
+  display: flex;
+  position: absolute;
   flex-flow: column wrap;
   justify-content: flex-start;
   align-items: center;
   align-content: center;
- background-color:@color1;
- box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
-position: relative;
-top:0vh;
- border-radius: 1vh;
-width: 99vw;
-height: 45vh;
-
+  background-color: @color1;
+  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
+  position: relative;
+  top: 0vh;
+  border-radius: 1vh;
+  width: 99vw;
+  height: 45vh;
 }
-.touredehanoi{
-flex: 0 1 auto;
+.touredehanoi {
+  flex: 0 1 auto;
 
   align-self: auto;
- min-width: 33vw;
+  min-width: 33vw;
   min-height: 9vh;
-
 }
 
 img {
@@ -463,48 +453,48 @@ img {
   flex: 0 1 auto;
 }
 .tower1 {
-    position: absolute;
-    top: 0;
-    left:15vw;
-    border-radius: 1vw;
-    width: 3vw;
-    height: 45vh;
-    z-index: 1;
-    background: linear-gradient(to right, #d7b889, #b27315, #966f33);
+  position: absolute;
+  top: 0;
+  left: 15vw;
+  border-radius: 1vw;
+  width: 3vw;
+  height: 45vh;
+  z-index: 1;
+  background: linear-gradient(to right, #d7b889, #b27315, #966f33);
 }
 .tower2 {
-    position: absolute;
-    top: 0;
-    left:48vw;
-    border-radius: 1vw;
-    width: 3vw;
-    height: 45vh;
-    z-index: 1;
-    background: linear-gradient(to right, #d7b889, #b27315, #966f33);
+  position: absolute;
+  top: 0;
+  left: 48vw;
+  border-radius: 1vw;
+  width: 3vw;
+  height: 45vh;
+  z-index: 1;
+  background: linear-gradient(to right, #d7b889, #b27315, #966f33);
 }
 .tower3 {
-    position: absolute;
-    top: 0;
-    left:81vw;
+  position: absolute;
+  top: 0;
+  left: 81vw;
 
-    border-radius: 1vw;
-    width: 3vw;
-    height: 45vh;
-    z-index: 1;
-    background: linear-gradient(to right, #d7b889, #b27315, #966f33);
+  border-radius: 1vw;
+  width: 3vw;
+  height: 45vh;
+  z-index: 1;
+  background: linear-gradient(to right, #d7b889, #b27315, #966f33);
 }
-.but1{
-  top:90vh;
-  left:10vw;
+.but1 {
+  top: 90vh;
+  left: 10vw;
 }
-.but2{
-  top:90vh;
-  left:40vw;
+.but2 {
+  top: 90vh;
+  left: 40vw;
 }
 button {
   position: absolute;
   color: #fbc831;
-  font-family: "Bitter", serif;
+  font-family: 'Bitter', serif;
   text-shadow: 3px 3px 3px #d17b0f;
   background: #007100;
   background-repeat: no-repeat;
@@ -538,8 +528,10 @@ button:hover {
   transform: rotateY(4deg) rotateZ(1deg);
 }
 .shake-horizontal {
-  -webkit-animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) infinite;
-animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) infinite;
+  -webkit-animation: shake-horizontal 0.8s
+    cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.03, 0.515, 0.955)
+    infinite;
 }
 /* ----------------------------------------------
  * Generated by Animista on 2019-2-11 18:32:51
@@ -555,238 +547,225 @@ animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) infini
   0%,
   100% {
     -webkit-transform: translateX(0);
-            transform: translateX(0);
+    transform: translateX(0);
   }
   10%,
   30%,
   50%,
   70% {
     -webkit-transform: translateX(-10px);
-            transform: translateX(-10px);
+    transform: translateX(-10px);
   }
   20%,
   40%,
   60% {
     -webkit-transform: translateX(10px);
-            transform: translateX(10px);
+    transform: translateX(10px);
   }
   80% {
     -webkit-transform: translateX(8px);
-            transform: translateX(8px);
+    transform: translateX(8px);
   }
   90% {
     -webkit-transform: translateX(-8px);
-            transform: translateX(-8px);
+    transform: translateX(-8px);
   }
 }
 @keyframes shake-horizontal {
   0%,
   100% {
     -webkit-transform: translateX(0);
-            transform: translateX(0);
+    transform: translateX(0);
   }
   10%,
   30%,
   50%,
   70% {
     -webkit-transform: translateX(-10px);
-            transform: translateX(-10px);
+    transform: translateX(-10px);
   }
   20%,
   40%,
   60% {
     -webkit-transform: translateX(10px);
-            transform: translateX(10px);
+    transform: translateX(10px);
   }
   80% {
     -webkit-transform: translateX(8px);
-            transform: translateX(8px);
+    transform: translateX(8px);
   }
   90% {
     -webkit-transform: translateX(-8px);
-            transform: translateX(-8px);
+    transform: translateX(-8px);
   }
 }
 @media only screen and (min-width: 340px) {
   .nombredecoup {
-  position: relative;
-  width: pow(@nombredor, 4);
-  height: calc(@nombredor*6);
+    position: relative;
+    width: pow(@nombredor, 4);
+    height: calc(@nombredor*6);
 
-  background-color:@color1;
-  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(0, 0, 0, 0.8);
-  border-radius: 1vw;
+    background-color: @color1;
+    box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    border-radius: 1vw;
 
-  text-align: center;
-   top: 1vh;
-  font-family: "Merriweather", serif;
-  padding: 1vw;
-}
-.but1{
-  top:70vh;
-  left:0;
-}
-.but2{
-  top:70vh;
-  left:40vw;
-}
-button{
-
- font-size: .8em;
-}
-.action {
-  position: absolute;
-  width: pow(@nombredor, 5.5);
-  height: pow(@nombredor, 5.1);
-  left: 36vw;
-  background-color:@color1;
-  border: 1px solid rgba(0, 0, 0, 0.8);
-  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
-  border-radius: 1vw;
-  color: black;
-  vertical-align: middle;
-  display: inline-block;
-  line-height: 1.2; /* on rétablit le line-height */
-  text-align: left;
-  font-family: "Merriweather", serif;
-  top: 40vh;
-  padding: 1vw;
-  padding-top: 0;
-
-}
-p{
-font-size: 0.6em;
-
-}
-.nombredecoup h1 {
-  font-size:inherit;
-  color: black;
-  margin: inherit;
-  font-size: pow(@nombredor, 3);
-}
-.posanneau  {
-  height:30vh;
-}
-.tower1 {
-
+    text-align: center;
+    top: 1vh;
+    font-family: 'Merriweather', serif;
+    padding: 1vw;
+  }
+  .but1 {
+    top: 70vh;
+    left: 0;
+  }
+  .but2 {
+    top: 70vh;
+    left: 40vw;
+  }
+  button {
+    font-size: 0.8em;
+  }
+  .action {
+    position: absolute;
+    width: pow(@nombredor, 5.5);
+    height: pow(@nombredor, 5.1);
+    left: 36vw;
+    background-color: @color1;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
+    border-radius: 1vw;
+    color: black;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 1.2; /* on rétablit le line-height */
+    text-align: left;
+    font-family: 'Merriweather', serif;
+    top: 40vh;
+    padding: 1vw;
+    padding-top: 0;
+  }
+  p {
+    font-size: 0.6em;
+  }
+  .nombredecoup h1 {
+    font-size: inherit;
+    color: black;
+    margin: inherit;
+    font-size: pow(@nombredor, 3);
+  }
+  .posanneau {
     height: 30vh;
-
-}
-.tower2 {
-
+  }
+  .tower1 {
     height: 30vh;
-
-}
-.tower3 {
-
+  }
+  .tower2 {
     height: 30vh;
-
-}
-.touredehanoi{
-
-  min-height: 6vh;
-
-}
+  }
+  .tower3 {
+    height: 30vh;
+  }
+  .touredehanoi {
+    min-height: 6vh;
+  }
 }
 
 @media only screen and (min-width: 640px) {
- .nombredecoup {
-  position: absolute;
-  width: pow(@nombredor, 5);
-  height: calc(@nombredor*7);
+  .nombredecoup {
+    position: absolute;
+    width: pow(@nombredor, 5);
+    height: calc(@nombredor*7);
 
-  background-color: @color1;
-  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(0, 0, 0, 0.8);
-  border-radius: 1vw;
+    background-color: @color1;
+    box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    border-radius: 1vw;
 
-  text-align: center;
-   top: 62vh;
-  font-family: "Merriweather", serif;
-  padding: 1vw;
-}
-.but1{
-  top:90vh;
-  left:10vw;
-}
-.but2{
-  top:90vh;
-  left:40vw;
-}
-.action {
-  position: absolute;
-  width: pow(@nombredor, 8);
-  height: pow(@nombredor, 5);
-  left: 23vw;
-  background-color:@color1;
-  border: 1px solid rgba(0, 0, 0, 0.8);
-  box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
-  border-radius: 1vw;
-  color: black;
-  vertical-align: middle;
-  display: inline-block;
-  line-height: 1.2; /* on rétablit le line-height */
-  text-align: left;
-  font-family: "Merriweather", serif;
-  top: 62vh;
-  padding: 1vw;
-  padding-top: 0;
+    text-align: center;
+    top: 62vh;
+    font-family: 'Merriweather', serif;
+    padding: 1vw;
+  }
+  .but1 {
+    top: 90vh;
+    left: 10vw;
+  }
+  .but2 {
+    top: 90vh;
+    left: 40vw;
+  }
+  .action {
+    position: absolute;
+    width: pow(@nombredor, 8);
+    height: pow(@nombredor, 5);
+    left: 23vw;
+    background-color: @color1;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    box-shadow: 3px 3px 20px rgba(0, 0, 0, 0.5);
+    border-radius: 1vw;
+    color: black;
+    vertical-align: middle;
+    display: inline-block;
+    line-height: 1.2; /* on rétablit le line-height */
+    text-align: left;
+    font-family: 'Merriweather', serif;
+    top: 62vh;
+    padding: 1vw;
+    padding-top: 0;
+  }
+  p {
+    font-size: 1em;
+  }
+  button {
+    font-size: 1.618em;
+  }
+  .nombredecoup h1 {
+    color: black;
+    margin-top: 0;
+    font-size: 6.7em;
+  }
+  .posanneau {
+    height: 45vh;
+  }
 
-}
-p {
-  font-size: 1em;
-
-}
-button{
- font-size: 1.618em;
-}
-.nombredecoup h1 {
-  color: black;
-  margin-top: 0;
-  font-size: 6.7em;
-}
-.posanneau{
- height:45vh;}
-
-.tower1 {
+  .tower1 {
     position: absolute;
     top: 0;
-    left:15vw;
+    left: 15vw;
     border-radius: 1vw;
     width: 3vw;
     height: 45vh;
     z-index: 1;
     background: linear-gradient(to right, #d7b889, #b27315, #966f33);
-}
-.tower2 {
+  }
+  .tower2 {
     position: absolute;
     top: 0;
-    left:48vw;
+    left: 48vw;
     border-radius: 1vw;
     width: 3vw;
     height: 45vh;
     z-index: 1;
     background: linear-gradient(to right, #d7b889, #b27315, #966f33);
-}
-.tower3 {
+  }
+  .tower3 {
     position: absolute;
     top: 0;
-    left:81vw;
+    left: 81vw;
 
     border-radius: 1vw;
     width: 3vw;
     height: 45vh;
     z-index: 1;
     background: linear-gradient(to right, #d7b889, #b27315, #966f33);
-}
-.touredehanoi{
-flex: 0 1 auto;
+  }
+  .touredehanoi {
+    flex: 0 1 auto;
 
-  align-self: auto;
- min-width: 33vw;
-  min-height: 9vh;
-
-}
+    align-self: auto;
+    min-width: 33vw;
+    min-height: 9vh;
+  }
 }
 </style>
