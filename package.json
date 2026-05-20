@@ -23,7 +23,7 @@
     "vue2-touch-events": "^1.1.2",
     "webpack": "^5.105.4",
     "webpack-cli": "^3.3.6",
-    "webpack-dev-server": "^5.2.3"
+    "webpack-dev-server": "^5.2.4"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.27",
